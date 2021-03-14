@@ -22,6 +22,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 import java.util.Arrays;
+import java.util.Optional;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -74,6 +75,23 @@ public class EmployeeControllerTests {
 				.andExpect(jsonPath("$._embedded.employees[1]._links.employees.href", is("http://localhost/employees")))
 				.andExpect(jsonPath("$._links.self.href", is("http://localhost/employees"))) //
 				.andReturn();
+	}
+
+	@Test
+	public void getShouldFetchSingleEmployee() throws Exception {
+
+		given(repository.findById(1L)).willReturn(Optional.of(new Employee(1L, "Bilbo", "Baggins", "burglar")));
+		mvc.perform(get("/employees/1").accept(MediaTypes.HAL_JSON_VALUE))
+				.andDo(print())
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.id", is(1)))
+				.andExpect(jsonPath("$.firstName", is("Bilbo")))
+				.andExpect(jsonPath("$.lastName", is("Baggins")))
+				.andExpect(jsonPath("$.role", is("burglar")))
+				.andExpect(jsonPath("$._links.self.href", is("http://localhost/employees/1")))
+				.andExpect(jsonPath("$._links.employees.href", is("http://localhost/employees")))
+				.andReturn();
+
 	}
 
 }
